@@ -1,4 +1,6 @@
-import React, { useState } from 'react'
+import { action, observable, ObservableMap } from 'mobx'
+import React from 'react'
+
 import { ScreenComponentProps } from '../ScreenComponentProps'
 
 export interface Screen {
@@ -40,37 +42,50 @@ export interface ScreenEdge {
   startX: number | null
 }
 
-export const useScreenStore = () => {
-  const screensState = useState<{ [id: string]: Screen }>({})
-  const screenInstancesState = useState<ScreenInstance[]>([])
-  const screenInstancePointerState = useState(-1)
-  const screenInstanceOptionsState = useState<{
-    [id: string]: ScreenInstanceOption
-  }>({})
-  const screenInstancePromisesState = useState<{
-    [id: string]: ScreenInstancePromise
-  }>({})
-  const screenEdgeState = useState<ScreenEdge>({
+const store = observable<{
+  screens: ObservableMap<string, Screen>
+  screenInstances: ScreenInstance[]
+  screenInstancePointer: number
+  screenInstanceOptions: ObservableMap<string, ScreenInstanceOption>
+  screenInstancePromises: ObservableMap<string, ScreenInstancePromise>
+  screenEdge: ScreenEdge
+}>({
+  screens: observable.map<string, Screen>({}, { deep: false }),
+  screenInstances: [],
+  screenInstancePointer: -1,
+  screenInstanceOptions: observable.map<string, ScreenInstanceOption>(
+    {},
+    { deep: false }
+  ),
+  screenInstancePromises: observable.map<string, ScreenInstancePromise>(
+    {},
+    { deep: false }
+  ),
+  screenEdge: {
     startX: null,
     startTime: null,
-  })
+  },
+})
 
-  const setScreenInstanceIn = (
+export const setScreenInstanceIn = action(
+  (
     pointer: number,
     setter: (screenInstance: ScreenInstance) => ScreenInstance
   ) => {
-    screenInstancesState[1](
-      screenInstancesState[0].map((screenInstance, screenInstanceIndex) => {
+    store.screenInstances = store.screenInstances.map(
+      (screenInstance, screenInstanceIndex) => {
         if (screenInstanceIndex === pointer) {
           return setter(screenInstance)
         } else {
           return screenInstance
         }
-      })
+      }
     )
   }
+)
 
-  const addScreenInstanceAfter = (
+export const addScreenInstanceAfter = action(
+  (
     pointer: number,
     {
       screenId,
@@ -84,8 +99,8 @@ export const useScreenStore = () => {
       as: string
     }
   ) => {
-    screenInstancesState[1]([
-      ...screenInstancesState[0].filter((_, index) => index <= pointer),
+    store.screenInstances = [
+      ...store.screenInstances.filter((_, index) => index <= pointer),
       {
         id: screenInstanceId,
         screenId,
@@ -93,24 +108,20 @@ export const useScreenStore = () => {
         present,
         as,
       },
-    ])
+    ]
   }
+)
 
-  const increaseScreenInstancePointer = () => {
-    screenInstancePointerState[1](screenInstancePointerState[0] + 1)
-  }
+export const increaseScreenInstancePointer = action(() => {
+  store.screenInstancePointer = store.screenInstancePointer + 1
+})
 
-  return {
-    screensState,
-    screenInstancesState,
-    screenInstancePointerState,
-    screenInstanceOptionsState,
-    screenInstancePromisesState,
-    screenEdgeState,
-    setScreenInstanceIn,
-    addScreenInstanceAfter,
-    increaseScreenInstancePointer,
-  }
-}
+export const setScreenInstancePointer = action((pointer: number) => {
+  store.screenInstancePointer = pointer
+})
 
-export const GlobalStateContext = React.createContext(useScreenStore())
+export const setScreenEdge = action((screenEdge: ScreenEdge) => {
+  store.screenEdge = screenEdge
+})
+
+export default store
