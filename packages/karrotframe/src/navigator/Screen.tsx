@@ -5,9 +5,10 @@ import { generateScreenId } from '../utils'
 import {
   ScreenInstanceInfoProvider,
   ScreenInstanceOptionsProvider,
+  useGlobalState,
 } from './contexts'
 import { ScreenComponentProps } from './ScreenComponentProps'
-import store, { NavbarOptions } from './store'
+import { NavbarOptions } from './store'
 
 interface Props {
   /**
@@ -22,6 +23,7 @@ interface Props {
 }
 const Screen: React.FC<Props> = (props) => {
   const Component = props.component
+  const { addScreen } = useGlobalState()
 
   const id = useMemo(() => generateScreenId(), [])
 
@@ -31,16 +33,18 @@ const Screen: React.FC<Props> = (props) => {
       return
     }
 
-    store.screens.set(id, {
+    addScreen(id, {
       id,
       path: props.path,
       Component: ({ screenInstanceId, isTop, isRoot, as }) => {
+        const { addScreenInstanceOption } = useGlobalState()
+
         /**
          * ScreenContext를 통해 유저가 navbar를 바꿀때마다
          * 실제 ScreenInstance의 navbar를 변경
          */
         const setNavbar = action((navbar: NavbarOptions) => {
-          store.screenInstanceOptions.set(screenInstanceId, {
+          addScreenInstanceOption(screenInstanceId, {
             navbar,
           })
         })

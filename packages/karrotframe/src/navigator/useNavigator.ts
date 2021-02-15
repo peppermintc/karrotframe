@@ -2,10 +2,16 @@ import { useCallback } from 'react'
 import { useHistory } from 'react-router-dom'
 
 import { appendSearch, generateScreenInstanceId } from '../utils'
-import { useScreenInstanceInfo } from './contexts'
-import store from './store'
+import { useGlobalState, useScreenInstanceInfo } from './contexts'
 
 export function useNavigator() {
+  const {
+    screenInstances,
+    screenInstancePointer,
+    screenInstancePromises,
+    addScreenInstancePromise,
+  } = useGlobalState()
+
   const history = useHistory()
   const screenInfo = useScreenInstanceInfo()
 
@@ -33,7 +39,7 @@ export function useNavigator() {
 
         history.push(pathname + '?' + appendSearch(search || null, params))
 
-        store.screenInstancePromises.set(screenInfo.screenInstanceId, resolve)
+        addScreenInstancePromise(screenInfo.screenInstanceId, resolve)
       }),
     []
   )
@@ -45,31 +51,33 @@ export function useNavigator() {
     history.replace(pathname + '?' + appendSearch(search, { _si }))
   }, [])
 
-  const pop = useCallback((depth = 1) => {
-    const targetScreenInstance =
-      store.screenInstances[store.screenInstancePointer - depth]
+  const pop = useCallback(
+    (depth = 1) => {
+      const targetScreenInstance =
+        screenInstances[screenInstancePointer - depth]
 
-    const n = store.screenInstances
-      .filter(
-        (_, idx) =>
-          idx > store.screenInstancePointer - depth &&
-          idx <= store.screenInstancePointer
-      )
-      .map((screenInstance) => screenInstance.nestedRouteCount)
-      .reduce((acc, current) => acc + current + 1, 0)
-
-    history.go(-n)
-
-    const send = <T = object>(data: T) => {
-      if (targetScreenInstance) {
-        store.screenInstancePromises.get(targetScreenInstance.id)?.(
-          data ?? null
+      const n = screenInstances
+        .filter(
+          (_, idx) =>
+            idx > screenInstancePointer - depth && idx <= screenInstancePointer
         )
-      }
-    }
+        .map((screenInstance) => screenInstance.nestedRouteCount)
+        .reduce((acc, current) => acc + current + 1, 0)
 
-    return { send }
-  }, [])
+      history.go(-n)
+
+      const send = <T = object>(data: T) => {
+        if (targetScreenInstance) {
+          screenInstancePromises.current[targetScreenInstance.id]?.(
+            data ?? null
+          )
+        }
+      }
+
+      return { send }
+    },
+    [screenInstances, screenInstancePointer]
+  )
 
   return { push, replace, pop }
 }
