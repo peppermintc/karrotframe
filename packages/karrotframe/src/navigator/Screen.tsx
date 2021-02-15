@@ -20,6 +20,7 @@ interface Props {
   component?: React.ComponentType<ScreenComponentProps>
 }
 const Screen: React.FC<Props> = (props) => {
+  console.log('screen')
   const Component = props.component
 
   const {

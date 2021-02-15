@@ -19,7 +19,7 @@ import {
   useHistoryReplaceEffect,
 } from './hooks/useHistoryEffect'
 import styles from './Navigator.scss'
-import { GlobalStateContext, Screen, ScreenInstance } from './store'
+import { GlobalStateContext, Screen, ScreenInstance, useScreenStore } from './store'
 
 const DEFAULT_CUPERTINO_ANIMATION_DURATION = 350
 const DEFAULT_ANDROID_ANIMATION_DURATION = 270
@@ -73,7 +73,7 @@ const Navigator: React.FC<NavigatorProps> = (props) => {
           })(),
       }}
     >
-      <GlobalStateContext.Provider>
+      <GlobalStateContext.Provider value={useScreenStore()}>
         <NavigatorScreens
           theme={props.theme ?? 'Android'}
           onClose={props.onClose}
@@ -217,7 +217,8 @@ const NavigatorScreens: React.FC<NavigatorScreensProps> = (props) => {
 
     let matchScreen: Screen | null = null
 
-    for (const screen of screens) {
+    for (const id in screens) {
+      const screen = screens[id]
       if (matchPath(location.pathname, { exact: true, path: screen.path })) {
         matchScreen = screen
         break
@@ -244,7 +245,8 @@ const NavigatorScreens: React.FC<NavigatorScreensProps> = (props) => {
     (location) => {
       let matchScreen: Screen | null = null
 
-      for (const screen of screens) {
+      for (const id in screens) {
+        const screen = screens[id]
         if (matchPath(location.pathname, { exact: true, path: screen.path })) {
           matchScreen = screen
           break
@@ -277,7 +279,8 @@ const NavigatorScreens: React.FC<NavigatorScreensProps> = (props) => {
     (location) => {
       let matchScreen: Screen | null = null
 
-      for (const screen of screens) {
+      for (const id in screens) {
+        const screen = screens[id]
         if (matchPath(location.pathname, { exact: true, path: screen.path })) {
           matchScreen = screen
           break
@@ -303,7 +306,8 @@ const NavigatorScreens: React.FC<NavigatorScreensProps> = (props) => {
       backward(location) {
         let matchScreen: Screen | null = null
 
-        for (const screen of screens) {
+        for (const id in screens) {
+          const screen = screens[id]
           if (
             matchPath(location.pathname, { exact: true, path: screen.path })
           ) {
@@ -344,7 +348,8 @@ const NavigatorScreens: React.FC<NavigatorScreensProps> = (props) => {
       forward(location) {
         let screen: Screen | null = null
 
-        for (const s of screens) {
+        for (const id in screens) {
+          const s = screens[id]
           if (matchPath(location.pathname, { exact: true, path: s.path })) {
             screen = s
             break
@@ -426,7 +431,7 @@ const Transition: React.FC<TransitionProps> = memo((props) => {
     >
       <Card
         nodeRef={nodeRef}
-        screenPath={screens[props.screenInstance.screenId!.path]}
+        screenPath={screens[props.screenInstance.screenId]!.path}
         screenInstanceId={props.screenInstance.id}
         isRoot={props.screenInstanceIndex === 0}
         isTop={

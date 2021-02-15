@@ -72,7 +72,7 @@ export function useNavigator() {
 
     const send = <T = object>(data: T) => {
       if (targetScreenInstance) {
-        screenInstancePromises.get(targetScreenInstance.id)?.(data ?? null)
+        screenInstancePromises[targetScreenInstance.id]?.(data ?? null)
       }
     }
 
