@@ -1,13 +1,22 @@
-import { useCallback } from 'react'
+import { useCallback, useContext } from 'react'
 import { useHistory } from 'react-router-dom'
 
 import { appendSearch, generateScreenInstanceId } from '../utils'
 import { useScreenInstanceInfo } from './contexts'
-import store from './store'
+import { GlobalStateContext } from './store'
 
 export function useNavigator() {
   const history = useHistory()
   const screenInfo = useScreenInstanceInfo()
+
+  const {
+    screenInstancesState: [screenInstances],
+    screenInstancePointerState: [screenInstancePointer],
+    screenInstancePromisesState: [
+      screenInstancePromises,
+      setScreenInstancePromises,
+    ],
+  } = useContext(GlobalStateContext)
 
   const push = useCallback(
     <T = object>(
@@ -33,7 +42,10 @@ export function useNavigator() {
 
         history.push(pathname + '?' + appendSearch(search || null, params))
 
-        store.screenInstancePromises.set(screenInfo.screenInstanceId, resolve)
+        setScreenInstancePromises({
+          ...screenInstancePromises,
+          [screenInfo.screenInstanceId]: resolve,
+        })
       }),
     []
   )
@@ -46,14 +58,12 @@ export function useNavigator() {
   }, [])
 
   const pop = useCallback((depth = 1) => {
-    const targetScreenInstance =
-      store.screenInstances[store.screenInstancePointer - depth]
+    const targetScreenInstance = screenInstances[screenInstancePointer - depth]
 
-    const n = store.screenInstances
+    const n = screenInstances
       .filter(
         (_, idx) =>
-          idx > store.screenInstancePointer - depth &&
-          idx <= store.screenInstancePointer
+          idx > screenInstancePointer - depth && idx <= screenInstancePointer
       )
       .map((screenInstance) => screenInstance.nestedRouteCount)
       .reduce((acc, current) => acc + current + 1, 0)
@@ -62,9 +72,7 @@ export function useNavigator() {
 
     const send = <T = object>(data: T) => {
       if (targetScreenInstance) {
-        store.screenInstancePromises.get(targetScreenInstance.id)?.(
-          data ?? null
-        )
+        screenInstancePromises.get(targetScreenInstance.id)?.(data ?? null)
       }
     }
 

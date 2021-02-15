@@ -1,5 +1,4 @@
-import { action } from 'mobx'
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect, useMemo, useContext } from 'react'
 
 import { generateScreenId } from '../utils'
 import {
@@ -7,7 +6,7 @@ import {
   ScreenInstanceOptionsProvider,
 } from './contexts'
 import { ScreenComponentProps } from './ScreenComponentProps'
-import store, { NavbarOptions } from './store'
+import { GlobalStateContext, NavbarOptions } from './store'
 
 interface Props {
   /**
@@ -23,6 +22,14 @@ interface Props {
 const Screen: React.FC<Props> = (props) => {
   const Component = props.component
 
+  const {
+    screensState: [screens, setScreens],
+    screenInstanceOptionsState: [
+      screenInstanceOptions,
+      setScreenInstanceOptions,
+    ],
+  } = useContext(GlobalStateContext)
+
   const id = useMemo(() => generateScreenId(), [])
 
   useEffect(() => {
@@ -31,41 +38,47 @@ const Screen: React.FC<Props> = (props) => {
       return
     }
 
-    store.screens.set(id, {
-      id,
-      path: props.path,
-      Component: ({ screenInstanceId, isTop, isRoot, as }) => {
-        /**
-         * ScreenContext를 통해 유저가 navbar를 바꿀때마다
-         * 실제 ScreenInstance의 navbar를 변경
-         */
-        const setNavbar = action((navbar: NavbarOptions) => {
-          store.screenInstanceOptions.set(screenInstanceId, {
-            navbar,
-          })
-        })
+    setScreens({
+      ...screens,
+      [id]: {
+        id,
+        path: props.path,
+        Component: ({ screenInstanceId, isTop, isRoot, as }) => {
+          /**
+           * ScreenContext를 통해 유저가 navbar를 바꿀때마다
+           * 실제 ScreenInstance의 navbar를 변경
+           */
+          const setNavbar = (navbar: NavbarOptions) => {
+            setScreenInstanceOptions({
+              ...screenInstanceOptions,
+              [screenInstanceId]: {
+                navbar,
+              },
+            })
+          }
 
-        return (
-          <ScreenInstanceInfoProvider
-            value={{
-              screenInstanceId,
-              as,
-              path: props.path,
-            }}
-          >
-            <ScreenInstanceOptionsProvider
+          return (
+            <ScreenInstanceInfoProvider
               value={{
-                setNavbar,
+                screenInstanceId,
+                as,
+                path: props.path,
               }}
             >
-              {Component ? (
-                <Component isTop={isTop} isRoot={isRoot} />
-              ) : (
-                props.children
-              )}
-            </ScreenInstanceOptionsProvider>
-          </ScreenInstanceInfoProvider>
-        )
+              <ScreenInstanceOptionsProvider
+                value={{
+                  setNavbar,
+                }}
+              >
+                {Component ? (
+                  <Component isTop={isTop} isRoot={isRoot} />
+                ) : (
+                  props.children
+                )}
+              </ScreenInstanceOptionsProvider>
+            </ScreenInstanceInfoProvider>
+          )
+        },
       },
     })
   }, [])

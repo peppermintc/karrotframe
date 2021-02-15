@@ -1,10 +1,15 @@
 import classnames from 'classnames'
-import { Observer } from 'mobx-react-lite'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useContext,
+} from 'react'
 import zenscroll from 'zenscroll'
 
 import { useNavigatorOptions } from '../contexts'
-import store, { setScreenEdge } from '../store'
+import { GlobalStateContext } from '../store'
 import { useNavigator } from '../useNavigator'
 import styles from './Card.scss'
 import Navbar from './Navbar'
@@ -23,6 +28,11 @@ interface CardProps {
 const Card: React.FC<CardProps> = (props) => {
   const navigator = useNavigator()
   const navigatorOptions = useNavigatorOptions()
+
+  const {
+    screenInstanceOptionsState: [screenInstanceOptions],
+    screenEdgeState: [screenEdge, setScreenEdge],
+  } = useContext(GlobalStateContext)
 
   const [loading, setLoading] = useState(props.isRoot)
   const [popped, setPopped] = useState(false)
@@ -63,7 +73,7 @@ const Card: React.FC<CardProps> = (props) => {
   )
 
   const onEdgeTouchMove = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
-    if (store.screenEdge.startX) {
+    if (screenEdge.startX) {
       x.current = e.touches[0].clientX
 
       if (!requestAnimationFrameLock.current) {
@@ -71,7 +81,7 @@ const Card: React.FC<CardProps> = (props) => {
 
         requestAnimationFrame(() => {
           if (x.current > 0) {
-            const computedEdgeX = x.current - store.screenEdge.startX!
+            const computedEdgeX = x.current - screenEdge.startX!
 
             const $dim = dimRef.current
             const $frame = frameRef.current
@@ -108,7 +118,7 @@ const Card: React.FC<CardProps> = (props) => {
   const onEdgeTouchEnd = useCallback(() => {
     if (x.current) {
       const velocity =
-        x.current / (Date.now() - (store.screenEdge.startTime as number))
+        x.current / (Date.now() - (screenEdge.startTime as number))
 
       if (velocity > 1 || x.current / window.screen.width > 0.4) {
         setPopped(true)
@@ -146,9 +156,7 @@ const Card: React.FC<CardProps> = (props) => {
   }, [])
 
   const onTopClick = useCallback(() => {
-    const screenInstanceOption = store.screenInstanceOptions.get(
-      props.screenInstanceId
-    )
+    const screenInstanceOption = screenInstanceOptions[props.screenInstanceId]
 
     if (!screenInstanceOption?.navbar.disableScrollToTop && frameRef.current) {
       const scroller = zenscroll.createScroller(frameRef.current)
@@ -158,117 +166,107 @@ const Card: React.FC<CardProps> = (props) => {
     screenInstanceOption?.navbar.onTopClick?.()
   }, [])
 
-  return (
-    <Observer>
-      {() => {
-        const screenInstanceOption = store.screenInstanceOptions.get(
-          props.screenInstanceId
-        )
+  const screenInstanceOption = screenInstanceOptions[props.screenInstanceId]
 
-        return (
+  return (
+    <div
+      ref={props.nodeRef}
+      className={classnames(styles.cardTransitionNode, {
+        [styles.isNotPresent]: !props.isPresent,
+        [styles.isPresent]: props.isPresent,
+      })}
+    >
+      {!props.isRoot && (
+        <div
+          ref={dimRef}
+          className={classnames(styles.cardDim, {
+            [styles.isLoading]: loading,
+            [styles.isNavbarVisible]: !!screenInstanceOption?.navbar.visible,
+            [styles.isPresent]: props.isPresent,
+          })}
+          style={{
+            transition: `opacity ${navigatorOptions.animationDuration}ms`,
+          }}
+        />
+      )}
+      <div
+        className={classnames(styles.cardMainOffset, {
+          [styles.isNotTop]: !props.isTop,
+          [styles.isLoading]: loading,
+        })}
+        style={{
+          transition: `transform ${navigatorOptions.animationDuration}ms`,
+        }}
+      >
+        <div
+          className={classnames(styles.cardMain, {
+            [styles.isNavbarVisible]: !!screenInstanceOption?.navbar.visible,
+            [styles.isPresent]: props.isPresent,
+            [styles.isRoot]: props.isRoot,
+          })}
+          style={{
+            transition:
+              navigatorOptions.theme === 'Cupertino' && props.isPresent
+                ? `transform ${navigatorOptions.animationDuration}ms`
+                : navigatorOptions.theme === 'Android'
+                ? `transform ${navigatorOptions.animationDuration}ms, opacity ${navigatorOptions.animationDuration}ms`
+                : undefined,
+          }}
+        >
+          {!!screenInstanceOption?.navbar.visible && (
+            <Navbar
+              screenInstanceId={props.screenInstanceId}
+              theme={navigatorOptions.theme}
+              isRoot={props.isRoot}
+              isPresent={props.isPresent}
+              onClose={props.onClose}
+              onTopClick={onTopClick}
+            />
+          )}
           <div
-            ref={props.nodeRef}
-            className={classnames(styles.cardTransitionNode, {
-              [styles.isNotPresent]: !props.isPresent,
-              [styles.isPresent]: props.isPresent,
+            ref={frameOffsetRef}
+            className={classnames(styles.cardFrameOffset, {
+              [styles.isNotTop]: !props.isTop,
             })}
+            style={{
+              transition: `transform ${navigatorOptions.animationDuration}ms`,
+            }}
           >
-            {!props.isRoot && (
-              <div
-                ref={dimRef}
-                className={classnames(styles.cardDim, {
-                  [styles.isLoading]: loading,
-                  [styles.isNavbarVisible]: !!screenInstanceOption?.navbar
-                    .visible,
-                  [styles.isPresent]: props.isPresent,
-                })}
-                style={{
-                  transition: `opacity ${navigatorOptions.animationDuration}ms`,
-                }}
-              />
-            )}
             <div
-              className={classnames(styles.cardMainOffset, {
-                [styles.isNotTop]: !props.isTop,
-                [styles.isLoading]: loading,
+              ref={frameRef}
+              className={classnames(styles.cardFrame, {
+                [styles.isNotRoot]: !props.isRoot,
+                [styles.isPresent]: props.isPresent,
               })}
               style={{
-                transition: `transform ${navigatorOptions.animationDuration}ms`,
+                transition:
+                  navigatorOptions.theme === 'Cupertino'
+                    ? `transform ${navigatorOptions.animationDuration}ms`
+                    : undefined,
               }}
             >
-              <div
-                className={classnames(styles.cardMain, {
-                  [styles.isNavbarVisible]: !!screenInstanceOption?.navbar
-                    .visible,
-                  [styles.isPresent]: props.isPresent,
-                  [styles.isRoot]: props.isRoot,
-                })}
-                style={{
-                  transition:
-                    navigatorOptions.theme === 'Cupertino' && props.isPresent
-                      ? `transform ${navigatorOptions.animationDuration}ms`
-                      : navigatorOptions.theme === 'Android'
-                      ? `transform ${navigatorOptions.animationDuration}ms, opacity ${navigatorOptions.animationDuration}ms`
-                      : undefined,
-                }}
-              >
-                {!!screenInstanceOption?.navbar.visible && (
-                  <Navbar
-                    screenInstanceId={props.screenInstanceId}
-                    theme={navigatorOptions.theme}
-                    isRoot={props.isRoot}
-                    isPresent={props.isPresent}
-                    onClose={props.onClose}
-                    onTopClick={onTopClick}
-                  />
-                )}
-                <div
-                  ref={frameOffsetRef}
-                  className={classnames(styles.cardFrameOffset, {
-                    [styles.isNotTop]: !props.isTop,
-                  })}
-                  style={{
-                    transition: `transform ${navigatorOptions.animationDuration}ms`,
-                  }}
-                >
-                  <div
-                    ref={frameRef}
-                    className={classnames(styles.cardFrame, {
-                      [styles.isNotRoot]: !props.isRoot,
-                      [styles.isPresent]: props.isPresent,
-                    })}
-                    style={{
-                      transition:
-                        navigatorOptions.theme === 'Cupertino'
-                          ? `transform ${navigatorOptions.animationDuration}ms`
-                          : undefined,
-                    }}
-                  >
-                    {props.children}
-                  </div>
-                </div>
-                {navigatorOptions.theme === 'Cupertino' &&
-                  !props.isRoot &&
-                  !props.isPresent &&
-                  !popped && (
-                    <div
-                      className={classnames(styles.cardEdge, {
-                        [styles.isNavbarNotVisible]: !screenInstanceOption
-                          ?.navbar.visible,
-                        [styles.isNavbarVisible]: !!screenInstanceOption?.navbar
-                          .visible,
-                      })}
-                      onTouchStart={onEdgeTouchStart}
-                      onTouchMove={onEdgeTouchMove}
-                      onTouchEnd={onEdgeTouchEnd}
-                    />
-                  )}
-              </div>
+              {props.children}
             </div>
           </div>
-        )
-      }}
-    </Observer>
+          {navigatorOptions.theme === 'Cupertino' &&
+            !props.isRoot &&
+            !props.isPresent &&
+            !popped && (
+              <div
+                className={classnames(styles.cardEdge, {
+                  [styles.isNavbarNotVisible]: !screenInstanceOption?.navbar
+                    .visible,
+                  [styles.isNavbarVisible]: !!screenInstanceOption?.navbar
+                    .visible,
+                })}
+                onTouchStart={onEdgeTouchStart}
+                onTouchMove={onEdgeTouchMove}
+                onTouchEnd={onEdgeTouchEnd}
+              />
+            )}
+        </div>
+      </div>
+    </div>
   )
 }
 
