@@ -14,7 +14,11 @@ import { CSSTransition, TransitionGroup } from 'react-transition-group'
 import { NavigatorTheme } from '../types'
 import { appendSearch, generateScreenInstanceId } from '../utils'
 import { Card } from './components'
-import { NavigatorOptionsProvider, useNavigatorOptions } from './contexts'
+import {
+  GlobalStateProvider,
+  NavigatorOptionsProvider,
+  useNavigatorOptions,
+} from './contexts'
 import {
   useHistoryPopEffect,
   useHistoryPushEffect,
@@ -67,29 +71,31 @@ interface NavigatorProps {
 }
 const Navigator: React.FC<NavigatorProps> = (props) => {
   let h = (
-    <NavigatorOptionsProvider
-      value={{
-        theme: props.theme ?? 'Android',
-        animationDuration:
-          props.animationDuration ??
-          (() => {
-            switch (props.theme ?? 'Android') {
-              case 'Cupertino':
-                return DEFAULT_CUPERTINO_ANIMATION_DURATION
-              case 'Android':
-                return DEFAULT_ANDROID_ANIMATION_DURATION
-            }
-          })(),
-      }}
-    >
-      <NavigatorScreens
-        theme={props.theme ?? 'Android'}
-        onClose={props.onClose}
-        onDepthChange={props.onDepthChange}
+    <GlobalStateProvider>
+      <NavigatorOptionsProvider
+        value={{
+          theme: props.theme ?? 'Android',
+          animationDuration:
+            props.animationDuration ??
+            (() => {
+              switch (props.theme ?? 'Android') {
+                case 'Cupertino':
+                  return DEFAULT_CUPERTINO_ANIMATION_DURATION
+                case 'Android':
+                  return DEFAULT_ANDROID_ANIMATION_DURATION
+              }
+            })(),
+        }}
       >
-        {props.children}
-      </NavigatorScreens>
-    </NavigatorOptionsProvider>
+        <NavigatorScreens
+          theme={props.theme ?? 'Android'}
+          onClose={props.onClose}
+          onDepthChange={props.onDepthChange}
+        >
+          {props.children}
+        </NavigatorScreens>
+      </NavigatorOptionsProvider>
+    </GlobalStateProvider>
   )
 
   if (!props.useCustomRouter) {
