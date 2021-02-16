@@ -1,6 +1,9 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useCallback, useContext } from 'react'
+import { Navbar } from './components'
+import zenscroll from 'zenscroll'
 
-import { useScreenInstanceOptions } from './contexts'
+import { useGlobalState, useNavigatorOptions, useScreenInstanceOptions } from './contexts'
+import { FrameRefContext, NavbarInformationContext } from './components/Card'
 
 interface ScreenHelmetProps {
   /**
@@ -46,40 +49,60 @@ interface ScreenHelmetProps {
   onTopClick?: () => void
 }
 const ScreenHelmet: React.FC<ScreenHelmetProps> = (props) => {
+  const frameRef = useContext(FrameRefContext)
+  const navbarInformation = useContext(NavbarInformationContext)
+
   const screen = useScreenInstanceOptions()
+  const navigatorOptions = useNavigatorOptions()
+  const { screenInstanceOptions } = useGlobalState()
+
 
   useEffect(() => {
     screen.setNavbar({
       visible: true,
-      title: props.title ?? null,
-      appendLeft: props.appendLeft ?? null,
-      appendRight: props.appendRight ?? null,
-      closeButtonLocation: props.closeButtonLocation ?? 'left',
-      customBackButton: props.customBackButton ?? null,
-      customCloseButton: props.customCloseButton ?? null,
       disableScrollToTop: props.disableScrollToTop ?? false,
-      onTopClick: props.onTopClick,
     })
-  }, [props])
+  }, [props.disableScrollToTop])
 
   useEffect(
     () => () => {
       screen.setNavbar({
         visible: false,
-        title: null,
-        appendLeft: null,
-        appendRight: null,
-        closeButtonLocation: 'left',
-        customBackButton: null,
-        customCloseButton: null,
         disableScrollToTop: false,
-        onTopClick: undefined,
       })
     },
     []
   )
 
-  return null
+  const handleTopClick = useCallback(() => {
+    const screenInstanceOption = screenInstanceOptions[screen.screenInstanceId]
+
+    if (!screenInstanceOption?.navbar.disableScrollToTop) {
+      if (frameRef && frameRef.current) {
+        const scroller = zenscroll.createScroller(frameRef.current)
+        scroller.toY(0)
+      }
+    }
+
+    props.onTopClick?.()
+  }, [screenInstanceOptions])
+
+  return (
+    <Navbar
+      screenInstanceId={screen.screenInstanceId}
+      theme={navigatorOptions.theme}
+      isRoot={navbarInformation!.isRoot}
+      isPresent={navbarInformation!.isPresent}
+      title={props.title}
+      appendLeft={props.appendLeft}
+      appendRight={props.appendRight}
+      closeButtonLocation={props.closeButtonLocation}
+      customBackButton={props.customBackButton}
+      customCloseButton={props.customCloseButton}
+      onClose={navbarInformation!.onClose}
+      onTopClick={handleTopClick}
+    />
+  )
 }
 
 export default ScreenHelmet

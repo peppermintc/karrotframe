@@ -1,11 +1,18 @@
 import classnames from 'classnames'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import zenscroll from 'zenscroll'
+import React, { useCallback, useEffect, useRef, useState, createContext } from 'react'
 
 import { useGlobalState, useNavigatorOptions } from '../contexts'
 import { useNavigator } from '../useNavigator'
 import styles from './Card.scss'
-import Navbar from './Navbar'
+
+interface NavbarInformation {
+  isRoot: boolean
+  isPresent: boolean
+  onClose?: () => void
+}
+
+export const FrameRefContext = createContext<any>(null as any)
+export const NavbarInformationContext = createContext<NavbarInformation>({} as NavbarInformation)
 
 const $frameOffsetSet = new Set<HTMLDivElement>()
 
@@ -144,17 +151,6 @@ const Card: React.FC<CardProps> = (props) => {
     }
   }, [])
 
-  const onTopClick = useCallback(() => {
-    const screenInstanceOption = screenInstanceOptions[props.screenInstanceId]
-
-    if (!screenInstanceOption?.navbar.disableScrollToTop && frameRef.current) {
-      const scroller = zenscroll.createScroller(frameRef.current)
-      scroller.toY(0)
-    }
-
-    screenInstanceOption?.navbar.onTopClick?.()
-  }, [screenInstanceOptions])
-
   const screenInstanceOption = screenInstanceOptions[props.screenInstanceId]
 
   return (
@@ -202,16 +198,6 @@ const Card: React.FC<CardProps> = (props) => {
                 : undefined,
           }}
         >
-          {!!screenInstanceOption?.navbar.visible && (
-            <Navbar
-              screenInstanceId={props.screenInstanceId}
-              theme={navigatorOptions.theme}
-              isRoot={props.isRoot}
-              isPresent={props.isPresent}
-              onClose={props.onClose}
-              onTopClick={onTopClick}
-            />
-          )}
           <div
             ref={frameOffsetRef}
             className={classnames(styles.cardFrameOffset, {
@@ -234,7 +220,15 @@ const Card: React.FC<CardProps> = (props) => {
                     : undefined,
               }}
             >
-              {props.children}
+              <FrameRefContext.Provider value={frameRef}>
+                <NavbarInformationContext.Provider value={{
+                  isRoot: props.isRoot,
+                  isPresent: props.isPresent,
+                  onClose: props.onClose
+                }}>
+                  {props.children}
+                </NavbarInformationContext.Provider>
+              </FrameRefContext.Provider>
             </div>
           </div>
           {navigatorOptions.theme === 'Cupertino' &&

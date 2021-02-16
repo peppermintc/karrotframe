@@ -40,10 +40,17 @@ const Home: React.FC = () => {
 }
 
 const Page1: React.FC = () => {
+  const [title, setTitle] = React.useState('Page 1')
+  const left = React.useMemo(() => {
+    return <div>left</div>
+  }, [])
   return (
     <>
-      <ScreenHelmet title="Page 1" />
+      <ScreenHelmet title={title} appendLeft={left}/>
       Page 1
+      <button onClick={() => {
+        setTitle('pageeeeee')
+      }}>change title</button>
     </>
   )
 }

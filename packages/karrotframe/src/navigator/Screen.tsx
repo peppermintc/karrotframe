@@ -1,4 +1,3 @@
-import { action } from 'mobx'
 import React, { useEffect, useMemo } from 'react'
 
 import { generateScreenId } from '../utils'
@@ -43,11 +42,11 @@ const Screen: React.FC<Props> = (props) => {
          * ScreenContext를 통해 유저가 navbar를 바꿀때마다
          * 실제 ScreenInstance의 navbar를 변경
          */
-        const setNavbar = action((navbar: NavbarOptions) => {
+        const setNavbar = (navbar: NavbarOptions) => {
           addScreenInstanceOption(screenInstanceId, {
             navbar,
           })
-        })
+        }
 
         return (
           <ScreenInstanceInfoProvider
@@ -59,6 +58,7 @@ const Screen: React.FC<Props> = (props) => {
           >
             <ScreenInstanceOptionsProvider
               value={{
+                screenInstanceId,
                 setNavbar,
               }}
             >

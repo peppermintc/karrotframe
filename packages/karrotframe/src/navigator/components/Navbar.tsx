@@ -12,6 +12,12 @@ interface NavbarProps {
   theme: NavigatorTheme
   isRoot: boolean
   isPresent: boolean
+  title?: React.ReactNode
+  appendLeft?: React.ReactNode
+  appendRight?: React.ReactNode
+  closeButtonLocation?: 'left' | 'right'
+  customBackButton?: React.ReactNode
+  customCloseButton?: React.ReactNode
   onTopClick: () => void
   onClose?: () => void
 }
@@ -62,14 +68,12 @@ const Navbar: React.FC<NavbarProps> = (props) => {
     pop()
   }
 
-  const screenInstanceOption = screenInstanceOptions[props.screenInstanceId]
-
   const closeButton =
     props.onClose &&
     props.isRoot &&
-    (screenInstanceOption?.navbar.customCloseButton ? (
+    (props.customCloseButton ? (
       <div className={styles.navbarClose} onClick={props.onClose}>
-        {screenInstanceOption.navbar.customCloseButton}
+        {props.customCloseButton}
       </div>
     ) : (
       <div className={styles.navbarClose} onClick={props.onClose}>
@@ -79,9 +83,9 @@ const Navbar: React.FC<NavbarProps> = (props) => {
 
   const backButton =
     !props.isRoot &&
-    (screenInstanceOption?.navbar.customBackButton ? (
+    (props.customBackButton ? (
       <div className={styles.navbarBack} onClick={onBackClick}>
-        {screenInstanceOption.navbar.customBackButton}
+        {props.customBackButton}
       </div>
     ) : (
       <div className={styles.navbarBack} onClick={onBackClick}>
@@ -94,10 +98,10 @@ const Navbar: React.FC<NavbarProps> = (props) => {
     ))
 
   const isLeft = !!(
-    (screenInstanceOption?.navbar.closeButtonLocation === 'left' &&
+    (props.closeButtonLocation === 'left' &&
       closeButton) ||
     backButton ||
-    screenInstanceOption?.navbar.appendLeft
+    props.appendLeft
   )
 
   return (
@@ -108,10 +112,10 @@ const Navbar: React.FC<NavbarProps> = (props) => {
       <div className={styles.navbarMain}>
         <div className={styles.navbarFlex}>
           <div className={styles.navbarLeft}>
-            {screenInstanceOption?.navbar.closeButtonLocation === 'left' &&
+            {props.closeButtonLocation === 'left' &&
               closeButton}
             {backButton}
-            {screenInstanceOption?.navbar.appendLeft}
+            {props.appendLeft}
           </div>
           <div ref={centerRef} className={styles.navbarCenter}>
             <div
@@ -122,12 +126,12 @@ const Navbar: React.FC<NavbarProps> = (props) => {
                 width: centerMainWidth,
               }}
             >
-              {typeof screenInstanceOption?.navbar.title === 'string' ? (
+              {typeof props.title === 'string' ? (
                 <div className={styles.navbarCenterMainText}>
-                  {screenInstanceOption?.navbar.title}
+                  {props.title}
                 </div>
               ) : (
-                screenInstanceOption?.navbar.title
+                props.title
               )}
             </div>
             <div
@@ -139,8 +143,8 @@ const Navbar: React.FC<NavbarProps> = (props) => {
             />
           </div>
           <div className={styles.navbarRight}>
-            {screenInstanceOption?.navbar.appendRight}
-            {screenInstanceOption?.navbar.closeButtonLocation === 'right' &&
+            {props.appendRight}
+            {props.closeButtonLocation === 'right' &&
               closeButton}
           </div>
         </div>

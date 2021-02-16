@@ -25,14 +25,7 @@ export interface ScreenInstanceOption {
 
 export interface NavbarOptions {
   visible: boolean
-  title: React.ReactNode | null
-  appendLeft: React.ReactNode | null
-  appendRight: React.ReactNode | null
-  closeButtonLocation: 'left' | 'right'
-  customBackButton: React.ReactNode | null
-  customCloseButton: React.ReactNode | null
   disableScrollToTop: boolean
-  onTopClick?: () => void
 }
 
 export type ScreenInstancePromise = (data: any | null) => void

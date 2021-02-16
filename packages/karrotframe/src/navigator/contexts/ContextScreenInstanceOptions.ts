@@ -4,6 +4,7 @@ import { NavbarOptions } from '../store'
 
 export const ContextScreenInstanceOptions = createContext<{
   setNavbar: (navbar: NavbarOptions) => void
+  screenInstanceId: string
 }>(null as any)
 
 export const ScreenInstanceOptionsProvider =
