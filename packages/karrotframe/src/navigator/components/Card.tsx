@@ -49,6 +49,7 @@ const Card: React.FC<CardProps> = (props) => {
   const frameOffsetRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    console.log('called with [frameOffsetRef.current] as dep')
     const $frameOffset = frameOffsetRef.current
 
     if ($frameOffset) {

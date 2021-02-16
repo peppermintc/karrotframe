@@ -20,11 +20,10 @@ interface Props {
   component?: React.ComponentType<ScreenComponentProps>
 }
 const Screen: React.FC<Props> = (props) => {
-  console.log('screen')
   const Component = props.component
 
   const {
-    screensState: [screens, setScreens],
+    screensState:[, setScreens],
     screenInstanceOptionsState: [
       screenInstanceOptions,
       setScreenInstanceOptions,
@@ -39,49 +38,48 @@ const Screen: React.FC<Props> = (props) => {
       return
     }
 
-    setScreens({
-      ...screens,
+    setScreens((prevScreens) => ({
+      ...prevScreens,
       [id]: {
-        id,
-        path: props.path,
-        Component: ({ screenInstanceId, isTop, isRoot, as }) => {
-          /**
-           * ScreenContext를 통해 유저가 navbar를 바꿀때마다
-           * 실제 ScreenInstance의 navbar를 변경
-           */
-          const setNavbar = (navbar: NavbarOptions) => {
-            setScreenInstanceOptions({
-              ...screenInstanceOptions,
-              [screenInstanceId]: {
-                navbar,
-              },
-            })
-          }
+      id,
+      path: props.path,
+      Component: ({ screenInstanceId, isTop, isRoot, as }) => {
+        /**
+         * ScreenContext를 통해 유저가 navbar를 바꿀때마다
+         * 실제 ScreenInstance의 navbar를 변경
+         */
+        const setNavbar = (navbar: NavbarOptions) => {
+          setScreenInstanceOptions({
+            ...screenInstanceOptions,
+            [screenInstanceId]: {
+              navbar,
+            },
+          })
+        }
 
-          return (
-            <ScreenInstanceInfoProvider
+        return (
+          <ScreenInstanceInfoProvider
+            value={{
+              screenInstanceId,
+              as,
+              path: props.path,
+            }}
+          >
+            <ScreenInstanceOptionsProvider
               value={{
-                screenInstanceId,
-                as,
-                path: props.path,
+                setNavbar,
               }}
             >
-              <ScreenInstanceOptionsProvider
-                value={{
-                  setNavbar,
-                }}
-              >
-                {Component ? (
-                  <Component isTop={isTop} isRoot={isRoot} />
-                ) : (
-                  props.children
-                )}
-              </ScreenInstanceOptionsProvider>
-            </ScreenInstanceInfoProvider>
-          )
-        },
+              {Component ? (
+                <Component isTop={isTop} isRoot={isRoot} />
+              ) : (
+                props.children
+              )}
+            </ScreenInstanceOptionsProvider>
+          </ScreenInstanceInfoProvider>
+        )
       },
-    })
+    }}))
   }, [])
 
   return null

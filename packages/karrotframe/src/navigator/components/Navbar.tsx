@@ -32,6 +32,7 @@ const Navbar: React.FC<NavbarProps> = (props) => {
   const centerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    console.log('called with dependencies [screenInstanceOptions]')
     const onResize = () =>
       requestAnimationFrame(() => {
         if (!navbarRef.current || !centerRef.current) {
@@ -62,13 +63,15 @@ const Navbar: React.FC<NavbarProps> = (props) => {
         onResize()
       }
     }
-  }, [screenInstanceOptions])
+  // }, [screenInstanceOptions])
+  }, [])
 
   const onBackClick = () => {
+    console.log('onBackClickCalled')
     pop()
   }
 
-  const screenInstanceOption = screenInstanceOptions.get[props.screenInstanceId]
+  const screenInstanceOption = screenInstanceOptions[props.screenInstanceId]
   const closeButton =
     props.onClose &&
     props.isRoot &&

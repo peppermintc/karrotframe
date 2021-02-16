@@ -58,6 +58,7 @@ export function useNavigator() {
   }, [])
 
   const pop = useCallback((depth = 1) => {
+    console.log('pop called', screenInstances)
     const targetScreenInstance = screenInstances[screenInstancePointer - depth]
 
     const n = screenInstances

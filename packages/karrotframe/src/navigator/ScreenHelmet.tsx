@@ -49,6 +49,7 @@ const ScreenHelmet: React.FC<ScreenHelmetProps> = (props) => {
   const screen = useScreenInstanceOptions()
 
   useEffect(() => {
+    console.log('called with props as dep')
     screen.setNavbar({
       visible: true,
       title: props.title ?? null,
@@ -60,7 +61,8 @@ const ScreenHelmet: React.FC<ScreenHelmetProps> = (props) => {
       disableScrollToTop: props.disableScrollToTop ?? false,
       onTopClick: props.onTopClick,
     })
-  }, [props])
+  // }, [props])
+  }, [])
 
   useEffect(
     () => () => {

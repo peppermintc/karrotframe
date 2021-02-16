@@ -113,4 +113,4 @@ export const useScreenStore = () => {
   }
 }
 
-export const GlobalStateContext = React.createContext(useScreenStore())
+export const GlobalStateContext = React.createContext(null as any)

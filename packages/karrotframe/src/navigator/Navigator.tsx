@@ -57,6 +57,8 @@ interface NavigatorProps {
   onDepthChange?: (depth: number) => void
 }
 const Navigator: React.FC<NavigatorProps> = (props) => {
+  const store = useScreenStore()
+
   let h = (
     <NavigatorOptionsProvider
       value={{
@@ -73,7 +75,7 @@ const Navigator: React.FC<NavigatorProps> = (props) => {
           })(),
       }}
     >
-      <GlobalStateContext.Provider value={useScreenStore()}>
+      <GlobalStateContext.Provider value={store}>
         <NavigatorScreens
           theme={props.theme ?? 'Android'}
           onClose={props.onClose}
@@ -185,6 +187,7 @@ const NavigatorScreens: React.FC<NavigatorScreensProps> = (props) => {
   )
 
   useEffect(() => {
+    console.log('update isNavigatorInitialized')
     if (isNavigatorInitialized) {
       throw new Error('한 개의 앱에는 한 개의 Navigator만 허용됩니다')
     }
@@ -202,6 +205,7 @@ const NavigatorScreens: React.FC<NavigatorScreensProps> = (props) => {
   }, [])
 
   useEffect(() => {
+    console.log('initial mount navigator', location)
     if (!location.search) {
       return
     }
@@ -218,12 +222,15 @@ const NavigatorScreens: React.FC<NavigatorScreensProps> = (props) => {
     let matchScreen: Screen | null = null
 
     for (const id in screens) {
+      console.log(id)
       const screen = screens[id]
       if (matchPath(location.pathname, { exact: true, path: screen.path })) {
         matchScreen = screen
         break
       }
     }
+
+    console.log(screens, matchScreen)
 
     if (matchScreen) {
       pushScreen({
@@ -233,9 +240,10 @@ const NavigatorScreens: React.FC<NavigatorScreensProps> = (props) => {
         as: location.pathname,
       })
     }
-  }, [location.search])
+  }, [location.search, screens])
 
   useEffect(() => {
+    console.log('called with dependencies [props.onDepthChange, screenInstancePointer]', screenInstancePointer)
     if (screenInstancePointer > -1) {
       props.onDepthChange?.(screenInstancePointer)
     }
@@ -243,7 +251,8 @@ const NavigatorScreens: React.FC<NavigatorScreensProps> = (props) => {
 
   useHistoryPushEffect(
     (location) => {
-      let matchScreen: Screen | null = null
+    console.log('called useHistoryPushEffect with dependencies [pushScreen]')
+    let matchScreen: Screen | null = null
 
       for (const id in screens) {
         const screen = screens[id]
@@ -277,6 +286,7 @@ const NavigatorScreens: React.FC<NavigatorScreensProps> = (props) => {
 
   useHistoryReplaceEffect(
     (location) => {
+      console.log('called useHistoryPushEffect with dependencies [replaceScreen]')
       let matchScreen: Screen | null = null
 
       for (const id in screens) {
