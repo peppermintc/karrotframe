@@ -7,7 +7,10 @@ export interface Screen {
   id: string
   path: string
   Component: React.FC<
-    { screenInstanceId: string; as: string } & ScreenComponentProps
+    {
+      screenInstanceId: string
+      as: string
+    } & ScreenComponentProps
   >
 }
 

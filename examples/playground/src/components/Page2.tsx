@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 import {
   ScreenComponentProps,
@@ -8,7 +8,7 @@ import {
 } from 'karrotframe'
 import styled from '@emotion/styled'
 
-const Page2: React.FC<ScreenComponentProps> = ({ isTop, isRoot }) => {
+const Page2: React.FC<ScreenComponentProps> = ({ isTop, isRoot, setOnEnteredCallback }) => {
   const navigator = useNavigator()
   const [title, setTitle] = useState('')
 
@@ -22,6 +22,12 @@ const Page2: React.FC<ScreenComponentProps> = ({ isTop, isRoot }) => {
   const onPage3Click = () => {
     navigator.push('/page3')
   }
+
+  useEffect(() => {
+    setOnEnteredCallback(() => {
+      console.log('mutated on enter')
+    })
+  }, [setOnEnteredCallback])
 
   return (
     <Container>

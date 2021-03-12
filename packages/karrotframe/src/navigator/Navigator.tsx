@@ -2,7 +2,7 @@ import classnames from 'classnames'
 import { autorun } from 'mobx'
 import { Observer } from 'mobx-react-lite'
 import qs from 'querystring'
-import React, { memo, useCallback, useEffect, useRef } from 'react'
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react'
 import {
   HashRouter,
   matchPath,
@@ -423,6 +423,10 @@ interface TransitionProps {
 const Transition: React.FC<TransitionProps> = memo((props) => {
   const navigatorOptions = useNavigatorOptions()
   const nodeRef = useRef<HTMLDivElement>(null)
+  const [onEnteredCallback, _setOnEnteredCallback] = useState<() => void>(() => () => {})
+  const setOnEnteredCallback = useCallback((cb: () => void) => {
+    _setOnEnteredCallback(() => cb)
+  }, [])
 
   return (
     <Observer>
@@ -434,6 +438,7 @@ const Transition: React.FC<TransitionProps> = memo((props) => {
             nodeRef={nodeRef}
             timeout={navigatorOptions.animationDuration}
             in={props.screenInstanceIndex <= store.screenInstancePointer}
+            onEntered={onEnteredCallback}
             unmountOnExit
           >
             <Card
@@ -458,6 +463,7 @@ const Transition: React.FC<TransitionProps> = memo((props) => {
                 screenInstanceId={props.screenInstance.id}
                 isTop={props.isTop}
                 isRoot={props.isRoot}
+                setOnEnteredCallback={setOnEnteredCallback}
               />
             </Card>
           </CSSTransition>
