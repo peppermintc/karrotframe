@@ -9,9 +9,9 @@ const Home: React.FC<ScreenComponentProps> = ({ isTop, isRoot }) => {
 
   const onPage2Click = async () => {
     const data = await navigator.push('/page2', {
-      present: false,
+      present: true,
     })
-    console.log(data)
+    console.log('data', data)
   }
 
   const onAppendClick = () => {
@@ -31,113 +31,12 @@ const Home: React.FC<ScreenComponentProps> = ({ isTop, isRoot }) => {
               window.alert(1)
             }}
           >
-            qwrqwrqww
+            뒤로
           </div>
         }
       />
       위와 같이 상단바를 Customizing 할 수 있습니다 <br />
-      <button onClick={onPage2Click}>상단바가 있는 페이지2로 이동</button>
-      <button onClick={onAppendClick}>append</button>
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
-      스크롤테스트
-      <br />
+      <button onClick={onPage2Click}>페이지2로 push present=top</button>
     </Container>
   )
 }
