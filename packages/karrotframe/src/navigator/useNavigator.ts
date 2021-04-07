@@ -20,6 +20,7 @@ export function useNavigator() {
       to: string,
       options?: {
         present?: boolean
+        preloadRef?: any
       }
     ): Promise<T | null> =>
       new Promise((resolve) => {
@@ -37,12 +38,15 @@ export function useNavigator() {
           params._present = 'true'
         }
 
-        history.push(pathname + '?' + appendSearch(search || null, params))
-
         store.screenInstancePromises.set(screenInfo.screenInstanceId, {
           resolve,
           popped: false,
         })
+        store.screenInstancePreloadRefs.set(_si, {
+          preloadRef: options?.preloadRef ?? null,
+        })
+
+        history.push(pathname + '?' + appendSearch(search || null, params))
       }),
     []
   )
@@ -78,7 +82,9 @@ export function useNavigator() {
       .map((screenInstance) => screenInstance.nestedRouteCount)
       .reduce((acc, current) => acc + current + 1, 0)
 
-    const promise = store.screenInstancePromises.get(targetScreenInstance.id)
+    const promise = targetScreenInstance
+      ? store.screenInstancePromises.get(targetScreenInstance.id)
+      : undefined
     let data: any = null
 
     const dispose = history.listen(() => {

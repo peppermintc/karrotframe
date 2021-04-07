@@ -40,6 +40,10 @@ export type ScreenInstancePromise = {
   popped: boolean
 }
 
+export type ScreenInstancePreloadRef = {
+  preloadRef: any | null
+}
+
 export interface ScreenEdge {
   startTime: number | null
   startX: number | null
@@ -51,6 +55,7 @@ const store = observable<{
   screenInstancePointer: number
   screenInstanceOptions: ObservableMap<string, ScreenInstanceOption>
   screenInstancePromises: ObservableMap<string, ScreenInstancePromise>
+  screenInstancePreloadRefs: ObservableMap<string, ScreenInstancePreloadRef>
   screenEdge: ScreenEdge
 }>({
   screens: observable.map<string, Screen>({}, { deep: false }),
@@ -61,6 +66,10 @@ const store = observable<{
     { deep: false }
   ),
   screenInstancePromises: observable.map<string, ScreenInstancePromise>(
+    {},
+    { deep: false }
+  ),
+  screenInstancePreloadRefs: observable.map<string, ScreenInstancePreloadRef>(
     {},
     { deep: false }
   ),

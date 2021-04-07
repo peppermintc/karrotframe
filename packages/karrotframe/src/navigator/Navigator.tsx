@@ -434,6 +434,10 @@ const Transition: React.FC<TransitionProps> = memo((props) => {
     <Observer>
       {() => {
         const { Component } = store.screens.get(props.screenInstance.screenId)!
+        const screenInstancePreloadRef = store.screenInstancePreloadRefs.get(
+          props.screenInstance.id
+        )
+
         return (
           <CSSTransition
             key={props.screenInstance.id}
@@ -464,6 +468,7 @@ const Transition: React.FC<TransitionProps> = memo((props) => {
                 screenInstanceId={props.screenInstance.id}
                 isTop={props.isTop}
                 isRoot={props.isRoot}
+                preloadRef={screenInstancePreloadRef?.preloadRef ?? undefined}
               />
             </Card>
           </CSSTransition>
