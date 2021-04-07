@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import {
   ScreenComponentProps,
@@ -8,11 +8,19 @@ import {
 } from 'karrotframe'
 import styled from '@emotion/styled'
 
-const Page2: React.FC<ScreenComponentProps> = ({ isTop, isRoot }) => {
+const Page2: React.FC<ScreenComponentProps> = ({
+  isTop,
+  isRoot,
+  preloadRef,
+}) => {
   const navigator = useNavigator()
   const [title, setTitle] = useState('')
 
   const query = useQueryParams<{ id: string }>()
+
+  useEffect(() => {
+    console.log('preloadRef', preloadRef)
+  }, [preloadRef])
 
   const onPopClick = () => {
     navigator.pop().send({

@@ -10,6 +10,7 @@ const Home: React.FC<ScreenComponentProps> = ({ isTop, isRoot }) => {
   const onPage2Click = async () => {
     const data = await navigator.push('/page2', {
       present: false,
+      preloadRef: 123,
     })
     console.log(data)
   }
