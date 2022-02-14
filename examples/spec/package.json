@@ -26,8 +26,8 @@
     "@karrotframe/plugin": "workspace:^",
     "@karrotframe/pulltorefresh": "workspace:^",
     "@karrotframe/tabs": "workspace:^",
-    "react": "next",
-    "react-dom": "next",
+    "react": "18.0.0-alpha-67f38366a-20210830",
+    "react-dom": "18.0.0-alpha-67f38366a-20210830",
     "react-router-dom": "^5.2.0",
     "smoothscroll-polyfill": "^0.4.4"
   },
