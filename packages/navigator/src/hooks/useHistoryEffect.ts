@@ -32,15 +32,19 @@ export function useHistoryPopEffect(
       return
     }
 
-    locationKeyStack.current = [location.pathname + location.search]
+    locationKeyStack.current = [
+      location.key ?? location.pathname + location.search,
+    ]
   }, [location.search])
 
   useEffect(() => {
     return history.listen((location, action) => {
-      const locationKey = location.pathname + location.search
+      console.log(`karrotframe - ${location} - ${action}`)
+      const locationKey = location.key ?? location.pathname + location.search
 
       switch (action) {
         case 'PUSH': {
+          console.log(`karrotframe - push ${locationKey}`)
           if (
             locationKeyStack.current[locationKeyStack.current.length - 1] !==
             locationKey
@@ -54,7 +58,20 @@ export function useHistoryPopEffect(
             locationKey
           break
         }
+      }
+    })
+  }, [])
+
+  useEffect(() => {
+    return history.listen((location, action) => {
+      const locationKey = location.key ?? location.pathname + location.search
+      switch (action) {
         case 'POP': {
+          console.log(
+            'karrotframe - pop ',
+            locationKeyStack.current,
+            locationKey
+          )
           const ptr = locationKeyStack.current.findIndex(
             (key) => key === locationKey
           )

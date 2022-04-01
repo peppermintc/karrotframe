@@ -28,7 +28,11 @@ function useInitializeHistoryPopEffect() {
           location.search
         )
         const { screenInstanceId } = navigatorSearchParams.toObject()
-
+        console.log(
+          'karrotframe - pop - backward',
+          matchScreen,
+          screenInstanceId
+        )
         if (screenInstanceId && matchScreen) {
           const nextPtr = screenInstances.findIndex(
             (screenInstance) => screenInstance.id === screenInstanceId
@@ -52,10 +56,17 @@ function useInitializeHistoryPopEffect() {
         } else {
           mapScreenInstance({
             ptr: screenInstancePtr,
-            mapper: (screenInstance) => ({
-              ...screenInstance,
-              nestedRouteCount: screenInstance.nestedRouteCount - 1,
-            }),
+            mapper: (screenInstance) => {
+              console.log(
+                `karrotframe - nextNestedRouteCount - ${
+                  screenInstance.nestedRouteCount - 1
+                }`
+              )
+              return {
+                ...screenInstance,
+                nestedRouteCount: screenInstance.nestedRouteCount - 1,
+              }
+            },
           })
         }
       },
@@ -71,6 +82,12 @@ function useInitializeHistoryPopEffect() {
             matchPath(location.pathname, { exact: true, path: screen.path })
         )
 
+        console.log(
+          'karrotframe - pop - forward',
+          matchScreen,
+          screenInstanceId
+        )
+
         if (screenInstanceId && matchScreen) {
           push({
             screenId: matchScreen.id,
@@ -82,6 +99,11 @@ function useInitializeHistoryPopEffect() {
           mapScreenInstance({
             ptr: screenInstancePtr,
             mapper(screenInstance: IScreenInstance): IScreenInstance {
+              console.log(
+                `karrotframe - nextNestedRouteCount - ${
+                  screenInstance.nestedRouteCount + 1
+                }`
+              )
               return {
                 ...screenInstance,
                 nestedRouteCount: screenInstance.nestedRouteCount + 1,

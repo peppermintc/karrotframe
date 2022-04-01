@@ -243,6 +243,13 @@ export function useNavigator() {
         .map((screenInstance) => screenInstance.nestedRouteCount)
         .reduce((acc, current) => acc + current + 1, 0)
 
+      console.log(
+        'karrotframe - backwardCount',
+        backwardCount,
+        screenInstancePtr
+      )
+      console.log('karrotframe - screenInstance', screenInstances)
+
       const targetPromise =
         targetScreenInstance &&
         screenInstancePromiseMap[targetScreenInstance.id]
