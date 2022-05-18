@@ -26,12 +26,12 @@ function useInitialize() {
 
     window.__KARROTFRAME__ = true
 
-    const screenInstanceId = makeId()
-    const navigatorSearchParams = makeNavigatorSearchParams(location.search, {
-      screenInstanceId,
-    })
-
     if (screenInstances.length === 0) {
+      const screenInstanceId = makeId()
+      const navigatorSearchParams = makeNavigatorSearchParams(location.search, {
+        screenInstanceId,
+      })
+
       const matchScreen = Object.values(screens).find(
         (screen) =>
           screen &&
